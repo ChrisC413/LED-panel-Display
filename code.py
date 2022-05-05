@@ -1,4 +1,3 @@
-# SPDX-FileContributor: Modified by Chris Cowin
 # SPDX-FileCopyrightText: 2020 John Park for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
@@ -6,11 +5,14 @@
 import time
 import os
 import displayio
+import usb_cdc
 from adafruit_matrixportal.matrix import Matrix
-
+# usb_cdc.enable(console=True, data=True)
+serial = usb_cdc.data
+in_data = bytearray()
 
 SPRITESHEET_FOLDER = "/bmps"
-DEFAULT_FRAME_DURATION = 0.1  # 100ms
+DEFAULT_FRAME_DURATION = .4  # 100ms
 AUTO_ADVANCE_LOOPS = 3
 
 # --- Display setup ---
@@ -98,6 +100,19 @@ advance_image()
 while True:
     if auto_advance and current_loop >= AUTO_ADVANCE_LOOPS:
         advance_image()
+    while serial.in_waiting > 0:
+        byte = serial.read(1)
+        if byte == b'\r':
+            print(in_data.decode("utf-8"))
+            out_data = in_data
+            out_data += b'  '
+            in_data = bytearray()
+            out_index = 0
+            print(f'received: {out_data}')
+        else:
+            in_data += byte
+            if len(in_data) == 129:
+                in_data = in_data[128] + in_data[1:127]
+        
     advance_frame()
     time.sleep(frame_duration)
-
