@@ -194,7 +194,7 @@ def load_tide_images(nearest_tides):
     print(waves_top_pixel)
 
     for i in range(waves_top_pixel, 64, 8):
-        
+
         sprite = displayio.TileGrid(
             bitmap,
             pixel_shader=bitmap.pixel_shader,
@@ -251,34 +251,34 @@ def advance_frame():
 #         current_loop = current_loop + 1
 
     for i, sprite in enumerate(sprite_group):
+#         print(f'index{i}')
+#         print(f'current frame{current_frame}')
         if nearest_tides['direction'] == 'in':
-            if i < 3 - current_frame:
-#                 print(f'hide sprite {i}')
-                sprite[0] = current_frame
-                time.sleep(DEFAULT_FRAME_DURATION)
-            elif i < 4 - current_frame:
-#                 print(f'reqular sprite {i}')
+            # first frame show all sprites minus first 3
+            if (i == 3 - current_frame) or ( i==0 and 3 - current_frame < 0) : # top most visible sprite
+                print(f'top sprite {i} frame ={current_frame + 1}')
+                sprite[0] = (current_frame % 3)+1 
+            elif i < 3 - current_frame : # invisible sprite
+                print(f' hiding  sprite {i}')
                 sprite[0] = 0
-            else:
-                print(f'top sprite {i}')
-                sprite[0] = 4 + current_frame
+            else: # regular sprite
+                print(f'regular sprite at {i}, frame {5 + (current_frame % 3)}')
+                sprite[0] = 5 + (current_frame % 3)
                 time.sleep(DEFAULT_FRAME_DURATION)
         else:
-            if i < current_frame:
-                sprite[0] = 8
-            elif i == current_frame:
-                sprite[0] = 4 + current_frame
+            if (i < current_frame) and (i < 2) and (i < len(sprite_group)) : # invisible sprites
+                sprite[0] = 0 #top most sprite
+                sprite_group[i+1][0] = 1 + current_frame % 4
                 time.sleep(DEFAULT_FRAME_DURATION)
             else:
-                sprite[0] = current_frame
+                sprite[0] = 5 + current_frame % 4
                 time.sleep(DEFAULT_FRAME_DURATION)
-    if current_frame == 4:
-        current_frame = 0
+    if current_frame == 9:
+        current_frame = -1
 
 advance_image(nearest_tides)
 
 while True:
-
     while serial.in_waiting > 0:
         byte = serial.read(1)
         if byte == b'\r':
