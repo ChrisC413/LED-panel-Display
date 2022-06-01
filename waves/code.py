@@ -93,14 +93,14 @@ def calculate_nearest_tides(predictions):
             if len(predictions) > i+1:
                 nearest['next'] = predictions[i+1]
             else:
-                nearest['next'] = { 'h': str((int(prediction['h']) + 6) % 24),
+                nearest['next'] = {'h': str((int(prediction['h']) + 6) % 24),
                                    'm': prediction['m'],
-                                   'type': 'L' if prediction['type'] == 'H' else 'H' }
+                                   'type': 'L' if prediction['type'] == 'H' else 'H'}
     if 'previous' not in nearest:
         nearest['next'] = predictions[0]
-        nearest['previous'] = { 'h': str(24 - int(nearest['next']['h'])) ,
-                                   'm': nearest['next']['m'],
-                                   'type': 'L' if nearest['next']['type'] == 'H' else 'H' }
+        nearest['previous'] = {'h': str(24 - int(nearest['next']['h'])) ,
+                               'm': nearest['next']['m'],
+                               'type': 'L' if nearest['next']['type'] == 'H' else 'H'}
     nearest['direction'] = 'in' if nearest['previous']['type'] == 'L' else 'out'
 
     # how close to the next tide are we?
@@ -255,9 +255,9 @@ def advance_frame():
 #         print(f'current frame{current_frame}')
         if nearest_tides['direction'] == 'in':
             # first frame show all sprites minus first 3
-            if (i == 3 - current_frame) or ( i==0 and 3 - current_frame < 0) : # top most visible sprite
+            if (i == 3 - current_frame) or (i==0 and 3 - current_frame < 0) : # top most visible sprite
                 print(f'top sprite {i} frame ={current_frame + 1}')
-                sprite[0] = (current_frame % 3)+1 
+                sprite[0] = (current_frame % 3)+1
             elif i < 3 - current_frame : # invisible sprite
                 print(f' hiding  sprite {i}')
                 sprite[0] = 0
@@ -266,14 +266,19 @@ def advance_frame():
                 sprite[0] = 5 + (current_frame % 3)
                 time.sleep(DEFAULT_FRAME_DURATION)
         else:
+            # Tide going out
+            # gradually hide top 2 sprites after first 2 frames (1 per frame)
             if (i < current_frame) and (i < 2) and (i < len(sprite_group)) : # invisible sprites
                 sprite[0] = 0 #top most sprite
-                sprite_group[i+1][0] = 1 + current_frame % 4
-                time.sleep(DEFAULT_FRAME_DURATION)
+            elif (i==current_frame) and (i < 3) and i <= len(sprite_group) or (current_frame >= 3 and i==2):
+                sprite[0] = 1 + (current_frame % 3)
+#                 print(f'top sprite at {i}')
+#                 time.sleep(DEFAULT_FRAME_DURATION)
             else:
-                sprite[0] = 5 + current_frame % 4
+#                 print(f'regular sprite at {i}, current frame{current_frame}')
+                sprite[0] = 5 + (current_frame % 3)
                 time.sleep(DEFAULT_FRAME_DURATION)
-    if current_frame == 9:
+    if current_frame == 80:
         current_frame = -1
 
 advance_image(nearest_tides)
