@@ -12,8 +12,8 @@ def set_animations(key, value):
             print('cpu low')
             return '/bmps/slow'
 
-def set_time(time_str):
-    r.datetime = time.localtime(time_str - 60* 60 *4)
+def set_time(time_str: str):
+    r.datetime = time.localtime(int(time_str) - 60* 60 *4)
     current_time = r.datetime
     print(current_time)
 
@@ -22,10 +22,12 @@ def process_serial_input(input):
         input_obj = json.loads(input)
     except:
         print("bad input")
+        print(input)
         return
+
+    if 'time' in input_obj:
+        set_time(input_obj['time'])
 
     if 'cpu' in input_obj:
         return set_animations('cpu', input_obj['cpu'])
 
-    if 'time' in input_obj:
-        set_time(input_obj['time'])
